@@ -5,11 +5,13 @@ import telegram_bot.telegram_bot as tg_bot
 
 # global variable
 _bot = CQHttp(api_root='http://127.0.0.1:5700/', secret="", access_token="")
+
 mapping_friend_from_id_to_info = {}
 mapping_group_from_id_to_info = {}
 
 cur_id = None
 cur_type_is_group = False
+need_to_refresh = False
 
 
 def dispatch_to_coolq(content):
@@ -21,6 +23,14 @@ def dispatch_to_coolq(content):
         print("send to friend", cur_id)
 
 
+def get_cur_info():
+    tail = "\n... 类型:" + ("群" if cur_type_is_group else "朋友")
+    if cur_type_is_group:
+        return mapping_group_from_id_to_info[cur_id].get("group_name") + tail
+    else:
+        return mapping_friend_from_id_to_info[cur_id].get("remark") + tail
+
+
 def change_current(id, is_group=False):
     global cur_id, cur_type_is_group
     cur_id = id
@@ -29,6 +39,8 @@ def change_current(id, is_group=False):
 
 @_bot.on_message("private")
 def handle_private_message(context):
+    if need_to_refresh:
+        init_friends()
     global cur_id, cur_type_is_group
     if cur_id is None:
         cur_id = context.get("user_id")
@@ -39,7 +51,9 @@ def handle_private_message(context):
 
 
 @_bot.on_message("group")
-def handle_private_message(context):
+def handle_group_message(context):
+    if need_to_refresh:
+        init_groups()
     global cur_id, cur_type_is_group
     if cur_id is None:
         cur_id = context.get("group_id")
@@ -61,14 +75,15 @@ def handle_group_increase(context):
 
 @_bot.on_request('group', 'friend')
 def handle_request(context):
+    global need_to_refresh
+    need_to_refresh = True
     return {'approve': True}  # 同意所有加群、加好友请求
 
 
-def init_friends(force=False):
+def init_friends():
     print("init friends")
     global mapping_friend_from_id_to_info
-    if len(mapping_friend_from_id_to_info) > 0 and not force:
-        return
+
     all_group = _bot._get_friend_list()
     for group in all_group:
         friends = group.get("friends")
@@ -78,12 +93,12 @@ def init_friends(force=False):
             mapping_friend_from_id_to_info[qq_id] = friend
 
 
-def init_groups(force=False):
+def init_groups():
     print("init groups")
     global mapping_group_from_id_to_info
-    if len(mapping_group_from_id_to_info) > 0 and not force:
-        return
+
     all_groups = _bot.get_group_list()
+
     for group in all_groups:
         mapping_group_from_id_to_info[group.get("group_id")] = group
 
@@ -91,5 +106,5 @@ def init_groups(force=False):
 def run():
     init_friends()
     init_groups()
+    tg_bot.init_inline_keyboard()
     _bot.run(host='localhost', port=8889)
-
