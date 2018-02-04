@@ -7,20 +7,22 @@ from coolq_bot import coolq_bot as qq_bot
 # constants
 
 HELLO_MESSAGE = "使用 /help 查看帮助。\n" \
-                "使用 /change [群名称] 更改当前聊天。\n" \
                 "使用 /current 查看当前聊天。\n" \
+                "使用 /refresh 刷新列表。\n" \
                 "使用 /list_friends 查看所有好友\n" \
                 "使用 /list_groups 查看所有群组"
-
+config = open("./telegram_bot.config").read().split()
+OYMISS_TOKEN = config[0][len("TG_TOKEN="):]
+OY_TELEGRAM_ID = int(config[1][len("TG_ID="):])
+IS_PROXY = True if config[2][len("IS_PROXY="):] == "TRUE" else False
 
 # global variables
 _bot = None
-OYMISS_TOKEN = None
-OY_TELEGRAM_ID = None
 group_infos = None
 group_keyboard = None
 friend_infos = None
 friend_keyboard = None
+
 
 def dispatch_to_telegram(content):
     """
@@ -143,14 +145,12 @@ def list_groups_fun(bot, update):
     dispatch_inline_button("所有群组：\n", group_keyboard)
 
 
-def init(BOT_TOKEN, YOUR_ID, is_proxy):
-    global _bot, OYMISS_TOKEN, OY_TELEGRAM_ID
-    OYMISS_TOKEN = BOT_TOKEN
-    OY_TELEGRAM_ID = YOUR_ID
-
+def init():
     from telegram.ext import Updater
+    global _bot
+
     # init updater and proxy
-    if is_proxy:
+    if IS_PROXY:
         updater = Updater(token=OYMISS_TOKEN, request_kwargs={
             'proxy_url': 'socks5://127.0.0.1:1080/'
         })
@@ -177,5 +177,5 @@ def init(BOT_TOKEN, YOUR_ID, is_proxy):
     return updater
 
 
-def run(BOT_TOKEN, YOUR_ID, is_proxy=False):
-    init(BOT_TOKEN, YOUR_ID, is_proxy).start_polling()
+def run():
+    init().start_polling()

@@ -4,7 +4,10 @@ from cqhttp import CQHttp
 import telegram_bot.telegram_bot as tg_bot
 
 # global variable
-_bot = CQHttp(api_root='http://127.0.0.1:5700/', secret="", access_token="")
+config = open("./coolq_bot.config").read().split()
+_bot = CQHttp(api_root='http://127.0.0.1:5700/',
+              secret=config[0][len("CQHTTP_SECRET="):],
+              access_token=config[1][len("CQHTTP_ACCESS_TOKEN="):])
 
 mapping_friend_from_id_to_info = {}
 mapping_group_from_id_to_info = {}
@@ -77,7 +80,8 @@ def handle_group_increase(context):
 def handle_request(context):
     global need_to_refresh
     need_to_refresh = True
-    return {'approve': True}  # 同意所有加群、加好友请求
+    tg_bot.dispatch_to_telegram("有新的好友或群组")
+    # return {'approve': True}  # 同意所有加群、加好友请求
 
 
 def init_friends():
