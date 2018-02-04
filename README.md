@@ -54,7 +54,7 @@ $ sudo docker run -d --network=host -ti --rm --name cqhttp-test \
              -p 5700:5700 \
              -e CQHTTP_VNC_PASSWD=fK32lrGf \
              -e CQHTTP_POST_URL=http://localhost:8889 \
-	           -e CQHTTP_HOST=127.0.0.1 \
+	     -e CQHTTP_HOST=127.0.0.1 \
              -e CQHTTP_SERVE_DATA_FILES=yes \
              -e CQHTTP_ACCESS_TOKEN=Mgep4rV49rM8Jf \
              -e CQHTTP_SECRET=kP9yK2lrGxoymmpo~ \
