@@ -49,16 +49,16 @@ $ mkdir coolq  # 用于存储酷 Q 的程序文件
 
 ```
 $ sudo docker run -d --network=host -ti --rm --name cqhttp-test \
-             -v $(pwd)/coolq:/home/user/coolq \
-             -p 9000:9000 \
-             -p 5700:5700 \
-             -e VNC_PASSWD=fK32lrGf \
-             -e CQHTTP_POST_URL=http://localhost:8889 \
-	         -e CQHTTP_HOST=127.0.0.1 \
-             -e CQHTTP_SERVE_DATA_FILES=yes \
-             -e CQHTTP_ACCESS_TOKEN=Mgep4rV49rM8Jf \
-             -e CQHTTP_SECRET=kP9yK2lrGxoymmpo \
-             richardchien/cqhttp:latest
+            -v $(pwd)/coolq:/home/user/coolq \
+            -p 9000:9000 \
+            -p 5700:5700 \
+            -e VNC_PASSWD=fK32lrGf \
+            -e CQHTTP_POST_URL=http://localhost:8889 \
+            -e CQHTTP_HOST=127.0.0.1 \
+            -e CQHTTP_SERVE_DATA_FILES=yes \
+            -e CQHTTP_SECRET=kP9yK2lrGxoymmpo \
+            -e CQHTTP_ACCESS_TOKEN=Mgep4rV49rM8Jf \
+            richardchien/cqhttp:latest
 ```
 
 然后使用 访问 `your_ip:9000`。如果是本地的话，就填`localhost`，远程就填公网 `ip`。
