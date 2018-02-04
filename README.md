@@ -7,6 +7,11 @@
 [coolq-http-api](https://github.com/richardchien/coolq-http-api),
 [python-telegram-bot](https://github.com/python-telegram-bot/python-telegram-bot)
 
+## 效果图
+
+![切换聊天](./images/pic1.png)
+
+![命令窗口](./images/pic2.png)
 
 ## 使用步骤
 ### 1. 先要获取到你的Telegram 账号的ID（数字，类似于QQ号码).
