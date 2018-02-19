@@ -28,14 +28,28 @@ class MyTelegramBot:
         self.init_cache()
         self.init()
 
+    def delete_message(self, message_id):
+        self.updater.bot.delete_message(self.telegram_id, message_id)
+
     def send_to_myself(self, text, **kwargs):
-        self.updater.bot.send_message(chat_id=self.telegram_id, text=text, **kwargs)
         logging.info("send to me")
+        return self.updater.bot.send_message(chat_id=self.telegram_id, text=text, **kwargs)
+
+    def edit_message(self, text, keyboard, **kwargs):
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        self.updater.bot.edit_message_text(chat_id=self.telegram_id, text=text, **kwargs)
+        self.updater.bot.edit_message_reply_markup(chat_id=self.telegram_id, reply_markup=reply_markup, **kwargs)
+
+    def make_inline_keyboard(self, name, key):
+        return InlineKeyboardButton(name, callback_data=key)
+
+    def markup_inline_keyboard(self, keyboard):
+        return InlineKeyboardMarkup(keyboard)
 
     def send_inline_keyboard(self, text, keyboard):
-        reply_markup = InlineKeyboardMarkup(keyboard)
-        self.send_to_myself(text, reply_markup=reply_markup)
         logging.info("send inline keyboard")
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        return self.send_to_myself(text, reply_markup=reply_markup)
 
     def add_message_handler(self, fun):
         self.updater.dispatcher.add_handler(MessageHandler(Filters.text, fun))
@@ -68,11 +82,14 @@ class MyTelegramBot:
 
     def on_button_click(self, bot, update):
         query = update.callback_query
-        qq_id, is_group = int(query.data[1:]), query.data[0] == '#'
-        name = self.forward_bot.id_to_name_cache("groups" if is_group else "friends").get(qq_id)
-        self.send_to_myself("聊天变化为 -> " + name)
-        self.forward_bot.change_qq_chat(qq_id, is_group)
-        logging.info("on button click")
+        if query.data[0] == '~':
+            self.forward_bot.send_unread_message(query.data[1:])
+        else:
+            qq_id, is_group = int(query.data[1:]), query.data[0] == '#'
+            name = self.forward_bot.id_to_name_cache("groups" if is_group else "friends").get(qq_id)
+            self.send_to_myself("聊天变化为 -> " + name)
+            self.forward_bot.change_qq_chat(qq_id, is_group)
+            logging.info("on button click")
 
     def on_receive(self, bot, update):
         # check user if OY ?

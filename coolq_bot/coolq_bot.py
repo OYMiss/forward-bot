@@ -17,9 +17,6 @@ class CooQBot:
         self.refresh()
         self.forward_bot = forward_bot
 
-    def get_cache(self):
-        return self.cache
-
     def send_to_qq(self, text):
         if self.current["is group"]:
             self.coolq_bot.send_group_msg(group_id=self.current["id"], message=text)
@@ -66,7 +63,8 @@ class CooQBot:
         if self.current["id"] is None:
             self.current["id"] = context.get("user_id")
             self.current["is group"] = False
-        self.forward_bot.send_to_telegram(self.cache["friends"][context.get("user_id")] + ": " + context['message'])
+        self.forward_bot.send_to_telegram(self.cache["friends"][context.get("user_id")] + ": " + context['message'],
+                                          context.get("user_id"), False)
 
     def __handle_group_message(self, context):
         if self.current["id"] is None:
@@ -79,7 +77,8 @@ class CooQBot:
         if name == "":
             name = member['nickname']
         self.forward_bot.send_to_telegram(name + ": " + context['message']
-                                          + "\n... from " + self.cache["groups"][context.get("group_id")])
+                                          + "\n... from " + self.cache["groups"][context.get("group_id")],
+                                          context.get("group_id"), True)
 
     def __handle_group_increase(self, context):
         self.coolq_bot.send(context, message='欢迎新人～', is_raw=True)  # 发送欢迎新人
