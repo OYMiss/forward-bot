@@ -76,9 +76,8 @@ class CooQBot:
         name = member.get('card')
         if name == "":
             name = member['nickname']
-        self.forward_bot.send_to_telegram(name + ": " + context['message']
-                                          + "\n... from " + self.cache["groups"][context.get("group_id")],
-                                          context.get("group_id"), True)
+        self.forward_bot.send_to_telegram(name + ": " + context['message'],
+                                          context.get("group_id"), True, tail="\n... from " + self.cache["groups"][context.get("group_id")])
 
     def __handle_group_increase(self, context):
         self.coolq_bot.send(context, message='欢迎新人～', is_raw=True)  # 发送欢迎新人

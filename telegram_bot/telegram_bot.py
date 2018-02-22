@@ -85,18 +85,26 @@ class MyTelegramBot:
         if query.data[0] == '~':
             self.forward_bot.send_unread_message(query.data[1:])
         else:
+            # update.callback_query.edit_message_reply_markup(reply_markup=None)
+            # update.callback_query.message.delete()
             qq_id, is_group = int(query.data[1:]), query.data[0] == '#'
             name = self.forward_bot.id_to_name_cache("groups" if is_group else "friends").get(qq_id)
             self.send_to_myself("聊天变化为 -> " + name)
             self.forward_bot.change_qq_chat(qq_id, is_group)
-            logging.info("on button click")
+        logging.info("on button click")
+
+    def handler_custom_keyboard(self, command):
+        print(command)
 
     def on_receive(self, bot, update):
         # check user if OY ?
         if update.message.chat_id != self.telegram_id:
             return
-        self.forward_bot.send_to_qq(update.message.text)
-        logging.info("send to qq")
+        if len(update.message.text) > 0 and update.message.text[0] == '>':
+            self.handler_custom_keyboard(update.message.text)
+        else:
+            self.forward_bot.send_to_qq(update.message.text)
+            logging.info("send to qq")
 
     def init(self):
         # init handler

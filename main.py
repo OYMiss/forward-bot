@@ -26,26 +26,29 @@ class ForwardBot:
     def change_qq_chat(self, qq_id, is_group):
         coolq_bot.change_current(qq_id, is_group)
 
-    def send_to_telegram(self, text, qq_id, is_group):
+    def send_to_telegram(self, text, qq_id, is_group, tail=""):
         if qq_id == self.current["id"] and is_group == self.current["is group"]:
-            telegram_bot.send_to_myself(text)
+            telegram_bot.send_to_myself(text + tail)
         else:
             key = ("#" if is_group else "@") + str(qq_id)
             is_first = False
             if self.unread.get(key) is None:
                 self.unread[key] = list()
                 is_first = True
-
+            if len(self.unread[key]) > 0:
+                self.unread[key].pop()
             self.unread[key].append(text)
+            self.unread[key].append(tail)
+            prefix = "新消息：\n"
             name = self.cache["groups" if is_group else "friends"][qq_id]
-            keyboard = [[telegram_bot.make_inline_keyboard(name, key),
-                        telegram_bot.make_inline_keyboard("未读：" + str(len(self.unread[key])), "~" + key)]]
+            keyboard = [[telegram_bot.make_inline_keyboard("回复", key),
+                        telegram_bot.make_inline_keyboard("未读：" + str(len(self.unread[key]) - 1), "~" + key)]]
 
             if is_first:
-                message = telegram_bot.send_inline_keyboard(text, keyboard)
+                message = telegram_bot.send_inline_keyboard(prefix + text, keyboard)
                 self.message_id[key] = message.message_id
             else:
-                telegram_bot.edit_message(text, keyboard, message_id=self.message_id[key])
+                telegram_bot.edit_message(prefix + text + tail, keyboard, message_id=self.message_id[key])
 
     def send_unread_message(self, qq_id):
         text = ""
@@ -56,7 +59,7 @@ class ForwardBot:
         self.unread[qq_id] = None
         telegram_bot.delete_message(self.message_id[qq_id])
         name = self.cache["groups" if qq_id[0] == '#' else "friends"][int(qq_id[1:])]
-        telegram_bot.send_inline_keyboard("以下是未读消息：\n" + text, [[telegram_bot.make_inline_keyboard(name, qq_id)]])
+        telegram_bot.send_inline_keyboard("以下是未读消息：\n" + text, [[telegram_bot.make_inline_keyboard("回复消息", qq_id)]])
 
     def get_current_chat(self):
         return coolq_bot.get_cur_info()
