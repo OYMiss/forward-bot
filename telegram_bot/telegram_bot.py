@@ -8,25 +8,29 @@ from telegram.ext import \
 
 import logging
 
+from constants import CHAT_TYPE_FRIEND, CHAT_TYPE_GROUP, decode_id, makeup_id
+
+
+def read_config():
+    config = open("./telegram_bot.config").read().split()
+    token = config[0][len("TG_TOKEN="):]
+    telegram_id = int(config[1][len("TG_ID="):])
+    is_proxy = True if config[2][len("IS_PROXY="):] == "TRUE" else False
+
+    if is_proxy:
+        updater = Updater(token=token, request_kwargs={
+            'proxy_url': 'socks5://127.0.0.1:1080/'
+        })
+    else:
+        updater = Updater(token=token)
+    return updater, telegram_id
+
 
 class MyTelegramBot:
     def __init__(self, forward_bot):
-        config = open("./telegram_bot.config").read().split()
-        token = config[0][len("TG_TOKEN="):]
-        telegram_id = int(config[1][len("TG_ID="):])
-        is_proxy = True if config[2][len("IS_PROXY="):] == "TRUE" else False
-
-        if is_proxy:
-            self.updater = Updater(token=token, request_kwargs={
-                'proxy_url': 'socks5://127.0.0.1:1080/'
-            })
-        else:
-            self.updater = Updater(token=token)
-        self.telegram_id = telegram_id
+        self.updater, self.telegram_id = read_config()
         self.inline_keyboard_cache = dict()
         self.forward_bot = forward_bot
-        self.init_cache()
-        self.init()
 
     def delete_message(self, message_id):
         self.updater.bot.delete_message(self.telegram_id, message_id)
@@ -37,14 +41,12 @@ class MyTelegramBot:
 
     def edit_message(self, text, keyboard, **kwargs):
         reply_markup = InlineKeyboardMarkup(keyboard)
-        self.updater.bot.edit_message_text(chat_id=self.telegram_id, text=text, **kwargs)
-        self.updater.bot.edit_message_reply_markup(chat_id=self.telegram_id, reply_markup=reply_markup, **kwargs)
+        self.updater.bot.edit_message_text(chat_id=self.telegram_id, text=text, reply_markup=reply_markup, **kwargs)
+        # self.updater.bot.edit_message_reply_markup(chat_id=self.telegram_id, reply_markup=reply_markup, **kwargs)
 
-    def make_inline_keyboard(self, name, key):
+    @staticmethod
+    def make_inline_keyboard(name, key):
         return InlineKeyboardButton(name, callback_data=key)
-
-    def markup_inline_keyboard(self, keyboard):
-        return InlineKeyboardMarkup(keyboard)
 
     def send_inline_keyboard(self, text, keyboard):
         logging.info("send inline keyboard")
@@ -73,24 +75,23 @@ class MyTelegramBot:
         logging.info("refresh")
 
     def handler_command_list_friends(self, bot, update):
-        self.send_inline_keyboard("所有好友：\n", self.inline_keyboard_cache["friends"])
+        self.send_inline_keyboard("所有好友：\n", self.inline_keyboard_cache[CHAT_TYPE_FRIEND])
         logging.info("list friends")
 
     def handler_command_list_groups(self, bot, update):
-        self.send_inline_keyboard("所有群组：\n", self.inline_keyboard_cache["groups"])
+        self.send_inline_keyboard("所有群组：\n", self.inline_keyboard_cache[CHAT_TYPE_GROUP])
         logging.info("list groups")
 
     def on_button_click(self, bot, update):
-        query = update.callback_query
-        if query.data[0] == '~':
-            self.forward_bot.send_unread_message(query.data[1:])
+        callback_data = update.callback_query.data
+        if callback_data[0] == '~':
+            self.forward_bot.push_unread_message(callback_data[1:])
         else:
             # update.callback_query.edit_message_reply_markup(reply_markup=None)
             # update.callback_query.message.delete()
-            qq_id, is_group = int(query.data[1:]), query.data[0] == '#'
-            name = self.forward_bot.id_to_name_cache("groups" if is_group else "friends").get(qq_id)
+            name = self.forward_bot.get_name_by_id(callback_data)
             self.send_to_myself("聊天变化为 -> " + name)
-            self.forward_bot.change_qq_chat(qq_id, is_group)
+            self.forward_bot.change_qq_chat(callback_data)
         logging.info("on button click")
 
     def handler_custom_keyboard(self, command):
@@ -107,6 +108,8 @@ class MyTelegramBot:
             logging.info("send to qq")
 
     def init(self):
+        self.init_cache()
+
         # init handler
         self.add_command_handler("help", self.handler_command_help)
         self.add_command_handler("current", self.handler_command_current)
@@ -117,19 +120,24 @@ class MyTelegramBot:
         self.updater.dispatcher.add_handler(CallbackQueryHandler(self.on_button_click))
 
     def init_cache(self):
-        self.init_inline_keyboard("friends", prefix="@")
-        self.init_inline_keyboard("groups", prefix="#")
+        self.init_inline_keyboard()
 
-    def init_inline_keyboard(self, cache_type, prefix):
-        each_row = []
-        self.inline_keyboard_cache[cache_type] = []
-        for qq_id, name in self.forward_bot.id_to_name_cache(cache_type).items():
-            if len(each_row) > 0 and len(each_row) % 2 == 0:
-                self.inline_keyboard_cache[cache_type].append(each_row.copy())
-                each_row.clear()
-            each_row.append(InlineKeyboardButton(name, callback_data=prefix + str(qq_id)))
-        self.inline_keyboard_cache[cache_type].append(each_row)
+    def init_inline_keyboard(self):
+        each_row = [list(), list()]
+        self.inline_keyboard_cache[CHAT_TYPE_GROUP] = []
+        self.inline_keyboard_cache[CHAT_TYPE_FRIEND] = []
+        for qq_id, name in self.forward_bot.id_to_name_info().items():
+            cache_type = decode_id(qq_id)
+            print(cache_type, name)
+            row = each_row[cache_type]
+            if len(row) > 0 and len(row) % 2 == 0:
+                self.inline_keyboard_cache[cache_type].append(row.copy())
+                row.clear()
+            row.append(self.make_inline_keyboard(name, qq_id))
+        self.inline_keyboard_cache[CHAT_TYPE_GROUP].append(each_row[CHAT_TYPE_GROUP])
+        self.inline_keyboard_cache[CHAT_TYPE_FRIEND].append(each_row[CHAT_TYPE_FRIEND])
 
     def run(self):
+        self.init()
         self.updater.start_polling()
 
