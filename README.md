@@ -13,10 +13,25 @@
 
 ![命令窗口](./images/pic2.png)
 
+## 更新
+
+### 2018-02-23 更新
+
+1. 非当前联系人的消息会被收到未读消息。点击`未读：n` 可以查看未读消息。
+点击回复可以切换当前联系人。
+
+![易用的未读消息](./images/unread_msg.png)
+
+2. 最近联系人键盘
+
+点击快速切换联系人，但不会自动更新。需要手动使用 `recently` 显示或刷新。
+
+![最近联系人](./images/recently_shortcut.png)
+
 ## 使用步骤
 ### 1. 先要获取到你的Telegram 账号的ID（数字，类似于QQ号码).
 
-去找 `@oy_test_bot` 这个机器人然后 输入命令 `get_my_id`。
+去找 `@oy_test_bot` （有时这个机器人会被我停掉。）这个机器人然后 输入命令 `get_my_id`。
 
 然后`保存`好这个数字。
 
@@ -30,6 +45,7 @@
 help - 查看帮助。
 current - 查看当前聊天。
 refresh - 刷新列表
+recently - 更新快捷键盘
 list_friends - 查看所有好友
 list_groups - 查看所有群组
 ```
@@ -41,6 +57,7 @@ list_groups - 查看所有群组
 安装好之后。
 
 ```
+$ sudo systemctl start docker
 $ docker pull richardchien/cqhttp:latest
 $ mkdir coolq  # 用于存储酷 Q 的程序文件
 ```
@@ -48,6 +65,7 @@ $ mkdir coolq  # 用于存储酷 Q 的程序文件
 为了安全，修改 VNC_PASSWD, CQHTTP_ACCESS_TOKEN, CQHTTP_SECRET 这三项的内容。
 
 ```
+$ rm -rf coolq # 如果不是第一次运行，可能需要先删除 coolq。
 $ sudo docker run -d --network=host -ti --rm --name cqhttp-test \
             -v $(pwd)/coolq:/home/user/coolq \
             -p 9000:9000 \
@@ -61,8 +79,8 @@ $ sudo docker run -d --network=host -ti --rm --name cqhttp-test \
             richardchien/cqhttp:latest
 ```
 
-然后使用 访问 `your_ip:9000`。如果是本地的话，就填`localhost`，远程就填公网 `ip`。
-输入上面的 VNC_PASSWD 密码，登录QQ 号。登录之后，就可以把网页关掉。
+然后使用 访问 `http://your_ip:9000`。如果是本地的话就是 `http://localhost:9000/`。
+输入上面的 VNC_PASSWD 密码，登录QQ 号。
 
 ### 4. 运行 forward-bot
 
@@ -84,7 +102,7 @@ $ cd forward-bot
 如果使用代理 设置`IS_PROXY=TRUE`，否则 `FALSE`
 
 注：代码中是：`socks5://127.0.0.1:1080/`，需要改的话，
-直接改 `telegram_bot/telegram_bot.py` 第155行。
+直接改 `telegram_bot/telegram_bot.py` 第24行。
 
 格式如下：
 

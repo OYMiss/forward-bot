@@ -34,7 +34,7 @@ class CoolQBot:
             return "当前没有聊天"
         name = self.info["id_name"][qq_id]
 
-        tail = "\n... 类型:" + "群" if decode_id(qq_id) == CHAT_TYPE_GROUP else "好友"
+        tail = "\n... 类型:" + ("群" if decode_id(qq_id) == CHAT_TYPE_GROUP else "好友")
         return name + tail
 
     def change_current(self, qq_id):
@@ -48,9 +48,7 @@ class CoolQBot:
     def __init_friends(self):
         for group in self.coolq_bot._get_friend_list():
             for friend in group.get("friends"):
-                print(makeup_id(friend.get("user_id"), CHAT_TYPE_FRIEND))
                 self.info["id_name"][makeup_id(friend.get("user_id"), CHAT_TYPE_FRIEND)] = friend.get("remark")
-        print(self.info["id_name"])
 
     def __init_groups(self):
         for group in self.coolq_bot.get_group_list():

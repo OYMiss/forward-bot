@@ -1,6 +1,8 @@
 from telegram import \
     InlineKeyboardButton, \
-    InlineKeyboardMarkup
+    InlineKeyboardMarkup, \
+    ReplyKeyboardMarkup, \
+    ReplyKeyboardRemove
 
 from telegram.ext import \
     Updater, MessageHandler, Filters,\
@@ -53,6 +55,12 @@ class MyTelegramBot:
         reply_markup = InlineKeyboardMarkup(keyboard)
         return self.send_to_myself(text, reply_markup=reply_markup)
 
+    def send_reply_keyboard(self, keyboard):
+        # remove the old one
+        # self.send_to_myself(reply_markup=ReplyKeyboardRemove())
+        reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
+        self.send_to_myself(text="更新最近联系人", reply_markup=reply_markup)
+
     def add_message_handler(self, fun):
         self.updater.dispatcher.add_handler(MessageHandler(Filters.text, fun))
         logging.info("add message handler")
@@ -64,7 +72,11 @@ class MyTelegramBot:
     def handler_command_help(self, bot, update):
         self.send_to_myself("使用 /help 查看帮助。\n"
                             "使用 /current 查看当前聊天。\n使用 /refresh 刷新列表。\n"
+                            "使用 /recently 更新快捷键盘\n"
                             "使用 /list_friends 查看所有好友\n使用 /list_groups 查看所有群组")
+
+    def handler_command_recently(self, bot, update):
+        self.forward_bot.send_recent_list()
 
     def handler_command_current(self, bot, update):
         self.send_to_myself(self.forward_bot.get_current_chat())
@@ -85,17 +97,15 @@ class MyTelegramBot:
     def on_button_click(self, bot, update):
         callback_data = update.callback_query.data
         if callback_data[0] == '~':
-            self.forward_bot.push_unread_message(callback_data[1:])
+            self.forward_bot.read_all_unread_message(callback_data[1:])
         else:
             # update.callback_query.edit_message_reply_markup(reply_markup=None)
             # update.callback_query.message.delete()
-            name = self.forward_bot.get_name_by_id(callback_data)
-            self.send_to_myself("聊天变化为 -> " + name)
-            self.forward_bot.change_qq_chat(callback_data)
+            self.forward_bot.change_qq_chat_by_id(callback_data)
         logging.info("on button click")
 
     def handler_custom_keyboard(self, command):
-        print(command)
+        self.forward_bot.change_qq_chat_by_name(command)
 
     def on_receive(self, bot, update):
         # check user if OY ?
@@ -113,6 +123,7 @@ class MyTelegramBot:
         # init handler
         self.add_command_handler("help", self.handler_command_help)
         self.add_command_handler("current", self.handler_command_current)
+        self.add_command_handler("recently", self.handler_command_recently)
         self.add_command_handler("refresh", self.handler_command_refresh)
         self.add_command_handler("list_friends", self.handler_command_list_friends)
         self.add_command_handler("list_groups", self.handler_command_list_groups)
@@ -128,7 +139,6 @@ class MyTelegramBot:
         self.inline_keyboard_cache[CHAT_TYPE_FRIEND] = []
         for qq_id, name in self.forward_bot.id_to_name_info().items():
             cache_type = decode_id(qq_id)
-            print(cache_type, name)
             row = each_row[cache_type]
             if len(row) > 0 and len(row) % 2 == 0:
                 self.inline_keyboard_cache[cache_type].append(row.copy())
