@@ -6,6 +6,12 @@ Use telegram to chat with your QQ friends.
 
 ## 安装
 
+测试平台: macOS Mojave 10.14.2
+
+```bash
+sudo ifconfig lo0 alias 172.16.0.100
+```
+
 ```bash
 docker pull richardchien/cqhttp:latest
 
@@ -33,6 +39,22 @@ docker run -di --rm --name cqhttp-test \
 
 3. `CQHTTP_SECRET`，`CQHTTP_ACCESS_TOKEN` CoolQ 的 Secret 和 Token。
 
+```bash
+docker pull oymiss/forward-bot:alpha
+
+docker run -d --rm --name forward-test \
+             -e TG_TELEGRAM_ID=404348187 \
+             -e TG_ENABLE_PROXY=True \
+             -e TG_PROXY_URL=socks5h://172.16.0.100:1086/ \
+             -e TG_GROUP_TOKEN=525674017:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA \
+             -e TG_FRIEND_TOKEN=531873229:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA \
+             -e QQ_ACCESS_TOKEN=Mgep4rV49rM8Jf \
+             -e QQ_SECRET=kP9yK2lrGxoymmpo \
+             -e QQ_API_ROOT=http://172.17.0.3:5700/ \
+             -e QQ_POST_HOST=0.0.0.0 \
+             -e QQ_POST_PORT=8080 \
+             forward-bot:alpha
+```
 
 ## 使用方法
 
