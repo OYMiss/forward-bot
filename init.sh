@@ -9,3 +9,5 @@ SECRET = \"$QQ_SECRET\"
 API_ROOT = \"$QQ_API_ROOT\"
 POST_HOST = \"$QQ_POST_HOST\"
 POST_PORT = $QQ_POST_PORT" > forward-bot/constant.py
+
+python3 forward-bot/main.py
