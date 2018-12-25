@@ -19,23 +19,21 @@ sudo ifconfig lo0 alias 172.16.0.100
 
 2. docker 环境
 
-确保 docker 已经安装好。
+> 确保 docker 已经安装好。
 
 获取容器的 ip （下面要用到）
 `id` 通过 `docker ps` 查看
 
-使用 docker inspect <id>
-
-或者
-
-调用 `docker inspect --format '{{ .NetworkSettings.IPAddress }}' <id>`
+使用 docker inspect <id> 或者调用 `docker inspect --format '{{ .NetworkSettings.IPAddress }}' <id>`
 
 
 3. 获取 forward-bot 容器
 
 ```bash
 docker pull oymiss/forward-bot:alpha
+```
 
+```bash
 docker run -d --rm --name forward-test \
              -e TG_TELEGRAM_ID=404348187 \
              -e TG_ENABLE_PROXY=True \
@@ -47,7 +45,7 @@ docker run -d --rm --name forward-test \
              -e QQ_API_ROOT=http://172.17.0.3:5700/ \
              -e QQ_POST_HOST=0.0.0.0 \
              -e QQ_POST_PORT=8080 \
-             forward-bot:alpha
+             oymiss/forward-bot:alpha
 ```
 
 `TG_TELEGRAM_ID` 就是自己的 TELEGRAM_ID。
@@ -71,7 +69,9 @@ docker run -d --rm --name forward-test \
 
 ```bash
 docker pull richardchien/cqhttp:latest
+```
 
+```bash
 # 运行 docker 示例
 docker run -di --rm --name cqhttp-test \
              -v $(pwd)/coolq:/home/user/coolq \
