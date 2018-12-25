@@ -6,11 +6,12 @@ Use telegram to chat with your QQ friends.
 
 ## 安装
 
-测试平台: macOS Mojave 10.14.2
+已测试平台: macOS Mojave 10.14.2，CentOS 7.6.1810
 
 1. 配置网卡，使得 docker 容器能够访问到宿主机的代理（如果 docker 配置了代理或者不需要配置代理跳过即可)
 
 ```bash
+# 仅适用于macOS
 sudo ifconfig lo0 alias 172.16.0.100
 ```
 
@@ -48,7 +49,9 @@ docker run -d --rm --name forward-test \
              oymiss/forward-bot:alpha
 ```
 
-`TG_TELEGRAM_ID` 就是自己的 TELEGRAM_ID。
+测试的时候建议先不加 `-d`，方便调试。
+
+`TG_TELEGRAM_ID` 就是自己的 TELEGRAM_ID（数字的那个，https://t.me/get_id_bot 可以用这个机器人）。
 
 `TG_ENABLE_PROXY` 是否开启代理，使用填 True，不使用填 False。
 
@@ -98,7 +101,7 @@ docker run -di --rm --name cqhttp-test \
 
 `VNC_PASSWD` noVNC 密码。
 
-开启之后，打开 `http://127.0.0.1:9000/`，登陆 QQ 号码。
+开启之后，打开 `http://127.0.0.1:9000/`，登陆 QQ 号码（服务器的话就是公网ip）。
 
 ## 使用方法
 
