@@ -58,7 +58,7 @@ class TelegramBot:
         self.updater.dispatcher.add_handler(CommandHandler("show_contacts", self.show_contacts))
 
         self.updater.start_polling()
-        self.show_contacts()
+        self.show_contacts(None, None)
         self.updater.bot.send_message(chat_id=TELEGRAM_ID, text="Ready")
 
     def send_info(self, text: str):
@@ -85,7 +85,8 @@ class TelegramBot:
             keyboard.append(cur_row)
         return keyboard
 
-    def show_contacts(self):
+    def show_contacts(self, bot, update):
+        self.cloud.refresh_coolq()
         self.send_inline_keyboard("所有联系方式", self.make_contact_list_keyboard())
 
     def on_button_click(self, bot, update):

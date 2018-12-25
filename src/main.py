@@ -46,6 +46,10 @@ class Cloud:
     def handler_message(self, message: Message):
         self.target_map[message.target].send_message(message)
 
+    def refresh_coolq(self):
+        self.target_map[MESSAGE_TARGET_COOLQ].init_friends()
+        self.target_map[MESSAGE_TARGET_COOLQ].init_groups()
+
 
 def start_forwarding():
     from telegram_bot import TelegramBot, TelegramBotConfig
