@@ -8,36 +8,30 @@ Use telegram to chat with your QQ friends.
 
 测试平台: macOS Mojave 10.14.2
 
+1. 配置网卡，使得 docker 容器能够访问到宿主机的代理（如果 docker 配置了代理或者不需要配置代理跳过即可)
+
 ```bash
 sudo ifconfig lo0 alias 172.16.0.100
 ```
 
-```bash
-docker pull richardchien/cqhttp:latest
+要想让容器访问代理，把 ss 监听地址设置为 `0.0.0.0`。
 
-# 运行 docker 示例
-docker run -di --rm --name cqhttp-test \
-             -v $(pwd)/coolq:/home/user/coolq \
-             -p 9000:9000  \
-             -p 5700:5700 \
-             -e FORCE_ENV=true \
-             -e COOLQ_ACCOUNT=123456 \
-             -e CQHTTP_POST_URL=http://172.16.0.100:8080 \
-             -e CQHTTP_SERVE_DATA_FILES=yes \
-             -e CQHTTP_SECRET=kP9yK2lrGxoymmpo \
-             -e CQHTTP_ACCESS_TOKEN=Mgep4rV49rM8Jf \
-             -e VNC_PASSWD=fK32lrGf \
-             richardchien/cqhttp:latest
-```
 
-确保本机 9000 和 5700 没有端口占用。
+2. docker 环境
 
-1. `COOLQ_ACCOUNT` 换为机器人的 QQ 账号
-2. `CQHTTP_POST_URL` 这个是 forward-bot 容器的地址
+确保 docker 已经安装好。
 
-> 调用 `docker inspect --format '{{ .NetworkSettings.IPAddress }}' <id>`，`id` 通过 `docker ps` 查看
+获取容器的 ip （下面要用到）
+`id` 通过 `docker ps` 查看
 
-3. `CQHTTP_SECRET`，`CQHTTP_ACCESS_TOKEN` CoolQ 的 Secret 和 Token。
+使用 docker inspect <id>
+
+或者
+
+调用 `docker inspect --format '{{ .NetworkSettings.IPAddress }}' <id>`
+
+
+3. 获取 forward-bot 容器
 
 ```bash
 docker pull oymiss/forward-bot:alpha
@@ -55,6 +49,56 @@ docker run -d --rm --name forward-test \
              -e QQ_POST_PORT=8080 \
              forward-bot:alpha
 ```
+
+`TG_TELEGRAM_ID` 就是自己的 TELEGRAM_ID。
+
+`TG_ENABLE_PROXY` 是否开启代理，使用填 True，不使用填 False。
+
+`TG_PROXY_URL` 如果不使用，也别删。
+
+`TG_GROUP_TOKEN` 接受群组消息的 telegram 的机器人 TOKEN。
+
+`TG_FRIEND_TOKEN` 接受私聊消息的 telegram 的机器人 TOKEN。
+
+`QQ_ACCESS_TOKEN` 对应下一步的 `CQHTTP_ACCESS_TOKEN` 。
+
+`QQ_SECRET` 对应下一步的的 `CQHTTP_SECRET`。
+
+`QQ_API_ROOT` 下一步的 cqhttp 容器的 IP。
+
+
+3. 获取 cqhttp 容器
+
+```bash
+docker pull richardchien/cqhttp:latest
+
+# 运行 docker 示例
+docker run -di --rm --name cqhttp-test \
+             -v $(pwd)/coolq:/home/user/coolq \
+             -p 9000:9000  \
+             -p 5700:5700 \
+             -e FORCE_ENV=true \
+             -e COOLQ_ACCOUNT=123456 \
+             -e CQHTTP_POST_URL=http://172.17.0.2:8080 \
+             -e CQHTTP_SERVE_DATA_FILES=yes \
+             -e CQHTTP_SECRET=kP9yK2lrGxoymmpo \
+             -e CQHTTP_ACCESS_TOKEN=Mgep4rV49rM8Jf \
+             -e VNC_PASSWD=fK32lrGf \
+             richardchien/cqhttp:latest
+
+```
+
+确保本机 9000 和 5700 可用。
+
+`COOLQ_ACCOUNT` QQ 机器人的账号
+
+`CQHTTP_POST_URL` 对应下一步 forward-bot 容器的 IP 地址。
+
+`CQHTTP_SECRET`，`CQHTTP_ACCESS_TOKEN` 为密钥，测试成功后建议修改。
+
+`VNC_PASSWD` noVNC 密码。
+
+开启之后，打开 `http://127.0.0.1:9000/`，登陆 QQ 号码。
 
 ## 使用方法
 

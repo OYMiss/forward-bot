@@ -63,11 +63,14 @@ class CoolQBot:
         self.coolq_bot.on_message("group")(self.handle_group_message)
         CoolQThread(self.coolq_bot).start()
         while True:
-            status = self.coolq_bot.get_status()
-            if status['online']:
-                break
-            time.sleep(3)
-            print("thread is waiting until QQ is online")
+            try:
+                status = self.coolq_bot.get_status()
+            except Exception as e:
+                time.sleep(1)
+                logging.info("thread is waiting until QQ is online")
+            else:
+                if status['online']:
+                    break
 
         self.init_friends()
         self.init_groups()
