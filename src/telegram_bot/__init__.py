@@ -55,7 +55,8 @@ class TelegramBot:
     def init_updater(self):
         self.updater.dispatcher.add_handler(MessageHandler(Filters.text, self.on_receive))
         self.updater.dispatcher.add_handler(CallbackQueryHandler(self.on_button_click))
-        self.updater.dispatcher.add_handler(CommandHandler("show_contacts", self.show_contacts))
+        self.updater.dispatcher.add_handler(CommandHandler("list", self.show_contacts))
+        self.updater.dispatcher.add_handler(CommandHandler("current", self.show_current))
 
         self.updater.start_polling()
         self.show_contacts(None, None)
@@ -84,6 +85,12 @@ class TelegramBot:
         if len(cur_row) > 0:
             keyboard.append(cur_row)
         return keyboard
+
+    def show_current(self, bot, update):
+        if self.current_receiver is None:
+            self.send_info("没有会话，可以使用 /list 查看所有可用会话。")
+            return
+        self.send_info("当前会话是「{0}」。".format(self.current_receiver.name))
 
     def show_contacts(self, bot, update):
         self.cloud.refresh_coolq()

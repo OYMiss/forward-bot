@@ -43,13 +43,12 @@ class CoolQBot:
         return self.friend_map, self.group_map
 
     def init_friends(self):
-        for group in self.coolq_bot._get_friend_list():
-            for friend in group.get("friends"):
-                id = friend.get("user_id")
-                name = friend.get("remark")
-                assert(type(id) == int)
-                contact = Contact(id, name)
-                self.friend_map[id] = contact
+        for friend in self.coolq_bot.get_friend_list():
+            id = friend.get("user_id")
+            name = friend.get("remark")
+            assert(type(id) == int)
+            contact = Contact(id, name)
+            self.friend_map[id] = contact
 
     def init_groups(self):
         for group in self.coolq_bot.get_group_list():
