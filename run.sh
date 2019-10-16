@@ -14,7 +14,11 @@ qq_secret=kP9yK2lrGxoymmpo
 # 代理设置
 use_proxy=False # True or False
 # use_proxy=True
-proxy_url=socks5h://host.docker.internal:1080
+# 最好代理也用 docker 开一个服务。运行时要加上 --network botnet --ip 172.18.0.4，然后下面填 172.18.0.4。
+# 如果是 macOS，可以执行 sudo ifconfig lo0 alias 172.16.0.100，然后下面填 172.16.0.100。
+# host.docker.internal 无效。
+
+proxy_url=socks5h://ip:1080
 
 # 网络设置
 bot_net=172.18.0.0/16
