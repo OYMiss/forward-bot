@@ -35,8 +35,7 @@ wget https://raw.githubusercontent.com/OYMiss/forward-bot/master/run.sh
 
 ```bash
 # 运行
-chmod +x run.sh
-./run.sh
+chmod +x run_test.sh && ./run_test.sh
 ```
 
 然后使用打开 `http://your_ip:9000/`，输入 `run.sh` 或 `run_test.sh` 中的 vnc_passwd 进行登陆。
