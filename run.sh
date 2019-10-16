@@ -1,28 +1,60 @@
-#!/usr/bin/env bash
-sudo ifconfig lo0 alias 172.16.0.100
+# 用户设置
+tg_telegram_id=404348187
+qq_id=1195129533
 
-docker run -di --rm --name cqhttp-test \
-             -v $(pwd)/coolq:/home/user/coolq \
-             -p 9000:9000  \
-             -p 5700:5700 \
-             -e FORCE_ENV=true \
-             -e COOLQ_ACCOUNT=2991234664 \
-             -e CQHTTP_POST_URL=http://172.17.0.2:8080 \
-             -e CQHTTP_SERVE_DATA_FILES=yes \
-             -e CQHTTP_SECRET=kP9yK2lrGxoymmpo \
-             -e CQHTTP_ACCESS_TOKEN=Mgep4rV49rM8Jf \
-             -e VNC_PASSWD=fK32lrGf \
-             richardchien/cqhttp:latest
+# 密码设置
+tg_group_token=525674017:AAF7HPnA_d-SZbg_Q3BKOF3y5GQ9CkDhcUA
+tg_friend_token=531873229:AAH3vEBkpMEtdJgxuYNIWOhO8_ofSaW_n6A
 
-docker run --rm --name forward-test \
-             -e TG_TELEGRAM_ID=404348187 \
-             -e TG_ENABLE_PROXY=True \
-             -e TG_PROXY_URL=socks5h://172.16.0.100:1086/ \
-             -e TG_GROUP_TOKEN=525674017:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA \
-             -e TG_FRIEND_TOKEN=531873229:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA \
-             -e QQ_ACCESS_TOKEN=Mgep4rV49rM8Jf \
-             -e QQ_SECRET=kP9yK2lrGxoymmpo \
-             -e QQ_API_ROOT=http://172.17.0.3:5700/ \
-             -e QQ_POST_HOST=0.0.0.0 \
-             -e QQ_POST_PORT=8080 \
-             oymiss/forward-bot:alpha
+vnc_passwd=fK32lrGf
+
+qq_access_token=Mgep4rV49rM8Jf
+qq_secret=kP9yK2lrGxoymmpo
+
+# 代理设置
+use_proxy=False # True or False
+# use_proxy=True
+proxy_url=socks5h://host.docker.internal:1080
+
+# 网络设置
+bot_net=172.18.0.0/16
+forward_bot_ip=172.18.0.2
+cool_bot_ip=172.18.0.3
+
+docker network create --subnet=$bot_net botnet
+
+# 启动 Telegram 机器人
+echo 启动 Telegram 机器人
+docker run -d --rm --network botnet \
+            --ip $forward_bot_ip \
+            --dns 8.8.8.8 --dns 114.114.114.114 --name forward-test \
+            -e TG_TELEGRAM_ID=$tg_telegram_id \
+            -e TG_ENABLE_PROXY=$use_proxy \
+            -e TG_PROXY_URL=$proxy_url \
+            -e TG_GROUP_TOKEN=$tg_group_token \
+            -e TG_FRIEND_TOKEN=$tg_friend_token \
+            -e QQ_ACCESS_TOKEN=$qq_access_token \
+            -e QQ_SECRET=$qq_secret \
+            -e QQ_API_ROOT=http://$cool_bot_ip:5700/ \
+            -e QQ_POST_HOST=0.0.0.0 \
+            -e QQ_POST_PORT=8080 \
+            oymiss/forward-bot:beta
+
+# 启动 CoolQ
+echo 启动 CoolQ 机器人
+docker run -di --rm --network botnet \
+            --ip $cool_bot_ip \
+            --dns 8.8.8.8 --dns 114.114.114.114 --name cqhttp-test \
+            -v $(pwd)/coolq:/home/user/coolq \
+            -p 9000:9000  \
+            -e FORCE_ENV=true \
+            -e COOLQ_ACCOUNT=$qq_id \
+            -e CQHTTP_POST_URL=http://$forward_bot_ip:8080 \
+            -e CQHTTP_SERVE_DATA_FILES=yes \
+            -e CQHTTP_SECRET=$qq_secret \
+            -e CQHTTP_ACCESS_TOKEN=$qq_access_token \
+            -e VNC_PASSWD=$vnc_passwd \
+            richardchien/cqhttp:4.12.0
+
+
+

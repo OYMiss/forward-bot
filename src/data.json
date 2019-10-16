@@ -1,0 +1,15 @@
+{
+    "QQ_ID": 1195129533,
+    "LOCALHOST": "host.docker.internal:8080",
+    "VNC_PASSWD": "fK32lrGf",
+    "TELEGRAM_ID": 404348187,
+    "ENABLE_PROXY": true,
+    "PROXY_URL": "socks5h://127.0.0.1:1086/",
+    "GROUP_TOKEN": "525674017:AAF7HPnA_d-SZbg_Q3BKOF3y5GQ9CkDhcUA",
+    "FRIEND_TOKEN": "531873229:AAH3vEBkpMEtdJgxuYNIWOhO8_ofSaW_n6A",
+    "ACCESS_TOKEN": "Mgep4rV49rM8Jf",
+    "SECRET": "kP9yK2lrGxoymmpo",
+    "API_ROOT": "http://127.0.0.1:5700/",
+    "POST_HOST": "0.0.0.0",
+    "POST_PORT": 8080
+}
