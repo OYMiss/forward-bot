@@ -21,11 +21,14 @@ docker pull richardchien/cqhttp:4.12.0
 ### 运行
 
 ```bash
-# 获取安装脚本
+# 方便测试的版本（建议先使用这个）。
+wget https://raw.githubusercontent.com/OYMiss/forward-bot/master/run_test.sh
+
+# 服务器版本。
 wget https://raw.githubusercontent.com/OYMiss/forward-bot/master/run.sh
 ```
 
-然后将 `run.sh` 里面的
+然后将 `run.sh` 或 `run_test.sh` 里面的
 `tg_telegram_id`、`qq_id`、`tg_group_token`、`tg_friend_token` 修改为自己的。
 
 > 按照需求修改代理设置和各种密码，网络设置默认。
@@ -36,7 +39,7 @@ chmod +x run.sh
 ./run.sh
 ```
 
-然后使用打开 `http://your_ip:9000/`，输入 `run.sh` 中的 vnc_passwd 进行登陆。
+然后使用打开 `http://your_ip:9000/`，输入 `run.sh` 或 `run_test.sh` 中的 vnc_passwd 进行登陆。
 
 ## 已知问题
 
