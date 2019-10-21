@@ -1,6 +1,6 @@
 # forward-bot
 
-Use telegram to chat with your QQ friends.
+Use Telegram to chat with your QQ friends.
 
 ![效果](/images/12-24.png)
 
