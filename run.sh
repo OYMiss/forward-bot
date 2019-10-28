@@ -28,7 +28,7 @@ cool_bot_ip=172.18.0.3
 docker network create --subnet=$bot_net botnet
 
 # 启动 Telegram 机器人
-echo start Telegram 机器人
+echo start Telegram bot
 docker run -d --rm --network botnet \
             --ip $forward_bot_ip \
             --dns 8.8.8.8 --dns 114.114.114.114 --name forward-test \
@@ -45,7 +45,7 @@ docker run -d --rm --network botnet \
             oymiss/forward-bot:beta
 
 # 启动 CoolQ
-echo start CoolQ 机器人
+echo start CoolQ bot
 docker run -di --rm --network botnet \
             --ip $cool_bot_ip \
             --dns 8.8.8.8 --dns 114.114.114.114 --name cqhttp-test \
