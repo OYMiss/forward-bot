@@ -22,7 +22,7 @@ ip() {
 cool_bot_ip=172.17.0.2
 
 # 启动 Telegram 机器人
-echo 启动 Telegram 机器人
+echo init Telegram bot
 tg_container_id=$(docker run -d --rm --name forward-test \
             -e TG_TELEGRAM_ID=$tg_telegram_id \
             -e TG_ENABLE_PROXY=$use_proxy \
@@ -39,7 +39,7 @@ tg_container_id=$(docker run -d --rm --name forward-test \
 forward_bot_ip=$(ip $tg_container_id)
 
 # 启动 CoolQ
-echo 启动 CoolQ 机器人
+echo start CoolQ bot
 qq_container_id=$(docker run -di --rm --name cqhttp-test \
             -v ~/coolq:/home/user/coolq \
             -p 9000:9000  \
@@ -53,7 +53,7 @@ qq_container_id=$(docker run -di --rm --name cqhttp-test \
             richardchien/cqhttp:4.12.0)
 cool_bot_ip=$(ip $qq_container_id)
 
-echo 重新启动 Telegram 机器人
+echo restart Telegram bot
 
 docker stop $tg_container_id
 
