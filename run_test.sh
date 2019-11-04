@@ -49,6 +49,7 @@ qq_container_id=$(docker run -di --rm --name cqhttp-test \
             -e CQHTTP_SERVE_DATA_FILES=yes \
             -e CQHTTP_SECRET=$qq_secret \
             -e CQHTTP_ACCESS_TOKEN=$qq_access_token \
+            -e CQHTTP_POST_MESSAGE_FORMAT=array \
             -e VNC_PASSWD=$vnc_passwd \
             richardchien/cqhttp:4.12.0)
 cool_bot_ip=$(ip $qq_container_id)

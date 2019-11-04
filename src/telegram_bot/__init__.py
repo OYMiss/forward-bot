@@ -12,14 +12,6 @@ from telegram.ext import \
     Updater, MessageHandler, Filters, \
     CommandHandler, CallbackQueryHandler
 
-
-def mark_up_message(message: Message):
-    if message.receiver.type == CONTACT_TYPE_FRIEND:
-        return "「{0}」：{1}".format(message.sender.name, message.content.value)
-    else:
-        return "「{0}@{1}」：{2}".format(message.sender.name, message.sender.sender_name, message.content.value)
-
-
 def make_inline_keyboard(name, key):
     return InlineKeyboardButton(name, callback_data=key)
 
@@ -151,24 +143,43 @@ class TelegramBot:
 
         msg = Message(MESSAGE_TARGET_COOLQ,
                       self.current_receiver,
-                      Content("text", update.message.text),
+                      [Content("text", update.message.text)],
                       Contact(0, "OY_TG", self.current_receiver.type))
         self.on_message(msg)
 
     def on_message(self, message: Message):
-        logging.info("[-> leaving from telegram] %s", message.content.value)
+        # logging.info("[-> leaving from telegram] %s", message.content.value)
         self.cloud.push_cloud(message)
 
     def edit_message(self, message_id, text):
         self.updater.bot.edit_message_text(chat_id=TELEGRAM_ID, message_id=message_id, text=text)
 
     def send_message(self, message: Message):
-        value = mark_up_message(message)
-        logging.info("[<- sending to telegram] id: %s value: %s", TELEGRAM_ID, value)
-        sent_message = self.updater.bot.send_message(chat_id=TELEGRAM_ID, text=value)
-        if self.current_receiver is None:
-            self.change_receiver(message.sender)
+        for content in message.contents:
+            sent_message = self.parse_and_send_content(content, message)
+            if self.current_receiver is None:
+                self.change_receiver(message.sender)
 
-        self.contact_mapped_by_message_id[sent_message.message_id] = message.sender
-        self.messages_mapped_by_contact_id[message.sender.id].append((sent_message, message))
+            self.contact_mapped_by_message_id[sent_message.message_id] = message.sender
+            self.messages_mapped_by_contact_id[message.sender.id].append((sent_message, message))
+
+    def parse_and_send_content(self, content: Content, message: Message):
+        sender_str = None
+        if message.receiver.type == CONTACT_TYPE_FRIEND:
+            sender_str = "「{0}」".format(message.sender.name)
+        else:
+            sender_str = "「{0}@{1}」".format(message.sender.name, message.sender.sender_name)
+        if content.type == 'image':
+            sent_message = self.updater.bot.send_photo(chat_id=TELEGRAM_ID, photo=content.value, caption=sender_str)
+        elif content.type == 'face':
+            sent_message = self.updater.bot.send_message(chat_id=TELEGRAM_ID, text=sender_str + '【表情】' + content.value)
+        elif content.type == 'bface':
+            sent_message = self.updater.bot.send_message(chat_id=TELEGRAM_ID, text=sender_str + '【大表情】' + content.value)
+        elif content.type == 'sface':
+            sent_message = self.updater.bot.send_message(chat_id=TELEGRAM_ID, text=sender_str + '【小表情】' + content.value)
+        elif content.type == 'record':
+            sent_message = self.updater.bot.send_message(chat_id=TELEGRAM_ID, text=sender_str + '【语音】' + content.value)
+        else:
+            sent_message = self.updater.bot.send_message(chat_id=TELEGRAM_ID, text=sender_str + content.value)
+        return sent_message
 

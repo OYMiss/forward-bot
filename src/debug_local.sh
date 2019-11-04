@@ -22,7 +22,7 @@ echo QQ_SECRET=$qq_secret
 echo LOCALHOST=$localhost
 
 # 启动 CoolQ
-echo 启动 CoolQ 机器人
+echo start CoolQ bot
 docker run -di --rm --name cqhttp-test \
             -v ~/coolq:/home/user/coolq \
             -p 9000:9000  \
@@ -33,11 +33,11 @@ docker run -di --rm --name cqhttp-test \
             -e CQHTTP_SERVE_DATA_FILES=yes \
             -e CQHTTP_SECRET=$qq_secret \
             -e CQHTTP_ACCESS_TOKEN=$qq_access_token \
+            -e CQHTTP_POST_MESSAGE_FORMAT=array \
             -e VNC_PASSWD=$vnc_passwd \
             richardchien/cqhttp:4.12.0
 
-
-echo 启动 Telegram 机器人
+echo start Telegram bot
 python3 main.py
 
 

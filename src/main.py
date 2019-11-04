@@ -27,10 +27,10 @@ class Contact:
 
 
 class Message:
-    def __init__(self, target: int, receiver: Contact, content: Content, sender: Contact):
+    def __init__(self, target: int, receiver: Contact, contents: list, sender: Contact):
         self.target = target
         self.receiver = receiver
-        self.content = content
+        self.contents = contents # List<Content>
         self.sender = sender
 
 

@@ -81,21 +81,86 @@ class CoolQBot:
             name = member['nickname']
         return name
 
+    def parse_content(self, data):
+        print(data)
+        if data['type'] == 'text':
+            # just append
+            return Content(data['type'], data['data']['text'])
+        elif data['type'] == 'share':
+            # just append
+            return Content(data['type'], data['data']['url'])
+        elif data['type'] == 'rich':
+            # just append
+            return Content(data['type'], data['data']['content'])
+        elif data['type'] == 'emoji':
+            # just append
+            return Content(data['type'], data['data']['id'])
+        elif data['type'] == 'at':
+            # just append
+            return Content(data['type'], '@' + data['data']['qq'])
+        elif data['type'] == 'rps':
+            # just append
+            return Content(data['type'], '【石头剪刀布】' + data['data']['type'])
+        elif data['type'] == 'shake':
+            # just append
+            return Content(data['type'], '【戳一戳】')
+        elif data['type'] == 'dice':
+            # just append
+            return Content(data['type'], '【骰子】' + data['data']['type'])
+        elif data['type'] == 'location':
+            # just append
+            return Content(data['type'], '【位置】' + data['data']['title'] + ":" + data['data']['content'])
+        elif data['type'] == 'sign':
+            # just append
+            return Content(data['type'], '【群签到】' + data['data']['location'])
+        elif data['type'] == 'music':
+            # just append
+            if data['type'] == 'custom':
+                return Content(data['type'], '【音乐】' + data['data']['type'] + str(data['data']['id']))
+            else:
+                return Content(data['type'], data['data']['url'])
+        elif data['type'] == 'image':
+            if 'url' in data['data']:
+                return Content(data['type'], data['data']['url'])
+            else:
+                return Content('text', data['data']['file'])
+            # if data['data'][file].endswith('.gif'):
+            #     return Content('gif', data['data'][url])
+            # else:
+            #     return Content(data['type'], data['data'][url])
+        elif data['type'] == 'face':
+            return Content(data['type'], data['data']['id'])
+        elif data['type'] == 'bface':
+            return Content(data['type'], data['data']['id'])
+        elif data['type'] == 'sface':
+            return Content(data['type'], data['data']['id'])
+        elif data['type'] == 'record':
+            return Content(data['type'], data['data']['file'])
+
+    def package_to_content(self, message):
+        contents = []
+        for content in message:
+            print(content)
+            contents.append(self.parse_content(content))
+        return contents
+
     def handle_private_message(self, context):
         qq_id = context.get("user_id")
-        text = context['message']
+        # text = context['message']
+        contents = self.package_to_content(context['message'])
         assert(type(qq_id) == int)
         assert(self.friend_map.get(qq_id, None) is not None)
 
         msg = Message(MESSAGE_TARGET_TELEGRAM_FRIEND,
                       Contact(0, "OY_TG"),
-                      Content("text", text),
+                      contents,
                       self.friend_map[qq_id])
         self.on_message(msg)
 
     def handle_group_message(self, context):
         qq_id = context.get("group_id")
-        text = context['message']
+        # text = context['message']
+        contents = self.package_to_content(context['message'])
         assert(type(qq_id) == int)
         assert(self.group_map.get(qq_id, None) is not None)
 
@@ -104,19 +169,20 @@ class CoolQBot:
 
         msg = Message(MESSAGE_TARGET_TELEGRAM_GROUP,
                       Contact(0, "OY_TG", CONTACT_TYPE_GROUP),
-                      Content("text", text),
+                      contents,
                       group_sender)
         self.on_message(msg)
 
     def on_message(self, message: Message):
-        logging.info("[<- leaving from coolq] %s", message.content.value)
+        # logging.info("[<- leaving from coolq] %s", message.content.value)
         self.cloud.push_cloud(message)
 
     def send_message(self, message: Message):
         qq_id = message.receiver.id
-        value = message.content.value
-        logging.info("[-> sending to coolq] id: %s value: %s", qq_id, value)
-        if message.receiver.type == CONTACT_TYPE_GROUP:
-            self.coolq_bot.send_group_msg(group_id=qq_id, message=value)
-        else:
-            self.coolq_bot.send_private_msg(user_id=qq_id, message=value)
+        for content in message.contents:
+            value = content.value
+            # logging.info("[-> sending to coolq] id: %s value: %s", qq_id, value)
+            if message.receiver.type == CONTACT_TYPE_GROUP:
+                self.coolq_bot.send_group_msg(group_id=qq_id, message=value)
+            else:
+                self.coolq_bot.send_private_msg(user_id=qq_id, message=value)
