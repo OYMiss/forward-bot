@@ -13,10 +13,14 @@ qq_secret=kP9yK2lrGxoymmpo
 
 # 代理设置
 use_proxy=False # True or False
+
+# 强烈不建议设置为 True。如果需要代理，应该使用 run_test.sh 文件。
 # use_proxy=True
-# 最好代理也用 docker 开一个服务。运行时要加上 --network botnet --ip 172.18.0.4，然后下面填 172.18.0.4。
-# 如果是 macOS，可以执行 sudo ifconfig lo0 alias 172.16.0.100，然后下面填 172.16.0.100。
-# host.docker.internal 无效。
+# 如果非要使用这个文件，建议用 docker 开一个代理服务。
+#     运行时要加上 --network botnet --ip 172.18.0.4，然后 proxy_url 的 ip 填 172.18.0.4。
+# 如果非要使用这个文件，又不想用 docker 另外开代理服务。
+#     如果是 macOS，可以执行 sudo ifconfig lo0 alias 172.16.0.100，然后 proxy_url 的 ip 填 172.16.0.100。
+#     注意：这里不要使用 host.docker.internal 作为 proxy_url 的 ip（由于设置了自定义网络，使用 host.docker.internal 并不会指向宿主机）。
 
 proxy_url=socks5h://ip:1080
 
